@@ -5,18 +5,18 @@ NROFF	= nroff
 
 #Some systems declare getopt, others do not.  Pick whichever works
 #CFLAGS = -O -DHAS_GETOPT
-CFLAGS = -O
-LDFLAGS =
+CFLAGS += -O2 -fstack-protector-strong --param=ssp-buffer-size=4 -w -D_FORTIFY_SOURCE=2
+LDFLAGS = -Wl,-O2,-z,relro,--as-needed,--hash-style=gnu
 LIBS =
 
 
-.SUFFIXES: .c .h .1 .man
+# .SUFFIXES: .c .h .1 .man
+.SUFFIXES: .c .h .1
 
-.1.man:
-	$(NROFF) -man $*.1 | col -b > $*.man
+# .1.man:
+#	$(NROFF) -man $*.1 | col -b > $*.man
 
 MANPAGES = infodump.1 inforead.1 txd.1 check.1 pix2gif.1
-FORMATTEDMAN = $(MANPAGES:.1=.man)
 
 CINC =
 COBJS = check.o
@@ -30,7 +30,9 @@ POBJS = pix2gif.o
 TINC = tx.h
 TOBJS = txd.o txio.o showverb.o infinfo.o symbols.o showobj.o
 
-all : check infodump pix2gif txd doc
+# "doc" target merely breaks manpages for modern systems
+# all : check infodump pix2gif txd doc
+all : check infodump pix2gif txd
 
 check : $(COBJS)
 	$(CC) -o $@ $(LDFLAGS) $(COBJS) $(LIBS)
@@ -52,7 +54,9 @@ txd : $(TOBJS)
 
 $(TOBJS) : $(TINC)
 
+# "doc" target merely breaks manpages for modern systems
 clean :
-	-rm *.o check infodump pix2gif txd $(FORMATTEDMAN)
+	# -rm *.o check infodump pix2gif txd $(FORMATTEDMAN)
+	-rm *.o check infodump pix2gif txd
 
 doc: $(FORMATTEDMAN)
